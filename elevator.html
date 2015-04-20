@@ -1,28 +1,41 @@
 <head>
-  <title>resolutions</title>
+  <title>Task Manager</title>
 </head>
 
 <body>
   <div class="container">
-    <header>
-        <h1>Monthly Resolutions ({{incompleteCount}})</h1>
+    <header class="rows">
+        <div class="columns large-8 small-text-center large-text-left">
+            <h1>Preostali poslovi ({{incompleteCount}})</h1>
+        </div>
 
-        <label class="hide-finished">
-            <input type="checkbox" checked="{{hideFinished}}">
-            Hide Finished Resolutions
-        </label>
+        <div class="columns large-4 small-text-center large-text-right">
+        {{> loginButtons align="right" }}
+        </div>
 
-        {{> loginButtons }}
-
-        {{#if currentUser}}
-        <form class="new-resolution">
-            <textarea name="title" placeholder="Adresa: Broj Telefona: Problem: " rows="10"></textarea>
-          <input type="submit" value="Submit">
-        </form>
-        {{/if}}
     </header>
+    <div class="row">
+        <div class="column 8-large">
+            {{#if currentUser }}
+                {{#if isInRole 'admin' 'foreman'}}
+                <form class="new-resolution">
+                    <textarea name="title" placeholder="Unesite Adresu,Broj Telefona i Problem" rows="10"></textarea>
+                    <input type="submit" value="Submit" class="button right">
+                </form>
+                    {{/if}}
+            {{/if}}
+        </div>
+    </div>
 
-    <ul>
+    <div class="row">
+      <div class="column 4-large">
+          <label class="hide-finished column 4-large right">
+              Sakrij zavrsene poslove
+              <input type="checkbox" checked="{{hideFinished}}">
+          </label>
+      </div>
+  </div>
+  <ul>
       {{#each resolutions}}
         {{>resolution}}
       {{/each}}
@@ -31,10 +44,20 @@
 </body>
 
 <template name="resolution">
-    <li class="{{#if checked}}checked{{/if}}">
-        <input type="checkbox" checked="{{checked}}" class="toggle-checked">
-        <span class="text">{{title}}</span>
-      <button class="delete">Remove</button>
+    <li class="{{#if checked}}checked{{/if}} row">
+        <div class="columns large-1">
+            <input type="checkbox" checked="{{checked}}" class="toggle-checked">
+        </div>
 
+        <div class="columns large-9 text-left">
+            <span class="text">{{title}}</span>
+        </div>
+            {{#if currentUser }}
+                {{#if isInRole 'admin'}}
+                    <div class="columns large-2">
+                        <button class="alert delete button">Remove</button>
+                    </div>
+                {{/if}}
+            {{/if}}
     </li>
 </template>

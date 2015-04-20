@@ -45,7 +45,7 @@ if (Meteor.isClient) {
   });
 
     Accounts.ui.config({
-        passwordSignupFields: "USERNAME_ONLY"
+        passwordSignupFields: "USERNAME_AND_EMAIL"
     });
 }
 
@@ -54,6 +54,33 @@ if (Meteor.isServer) {
     Meteor.publish("resolutions", function () {
         return Resolutions.find({});
     });
+
+        Meteor.publish(null, function (){
+            return Meteor.roles.find({});
+        });
+        var users = [
+            {name:"Osoba4",email:"Osoba4@qwe.qwe",roles:[]},
+            {name:"Osoba5",email:"Osoba5@qwe.qwe",roles:['admin']},
+            {name:"Osoba6",email:"Osoba6@qwe.qwe",roles:['foreman']}
+        ];
+
+        _.each(users, function (user) {
+            var id;
+
+            id = Accounts.createUser({
+                email: user.email,
+                password: "apple1",
+                profile: { name: user.name }
+            });
+
+            if (user.roles.length > 0) {
+                // Need _id of existing user record so this call must come
+                // after `Accounts.createUser` or `Accounts.onCreate`
+                Roles.addUsersToRoles(id, user.roles);
+            }
+
+        });
+
 }
 
 Meteor.methods({
