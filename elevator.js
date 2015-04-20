@@ -1,7 +1,10 @@
 Resolutions = new Mongo.Collection('resolutions');
 
 if (Meteor.isClient) {
-  Template.body.helpers({
+
+    Meteor.subscribe("resolutions");
+
+    Template.body.helpers({
     resolutions: function(){
       if(Session.get('hideFinished')){
         return Resolutions.find({checked:{$ne:true}},{sort:{checked:1}});
@@ -11,6 +14,9 @@ if (Meteor.isClient) {
     },
     hideFinished:function(){
       return Session.get('hideFinished');
+    },
+      incompleteCount: function () {
+        return Resolutions.find({checked: {$ne: true}}).count();
     }
   });
 
@@ -18,10 +24,8 @@ if (Meteor.isClient) {
     'submit .new-resolution': function(event) {
       var title = event.target.title.value;
 
-      Resolutions.insert({
-        title: title,
-        createdAt: new Date()
-      });
+      Meteor.call("addResolution", title);
+
       event.target.title.value = "";
 
       return false;
@@ -33,16 +37,45 @@ if (Meteor.isClient) {
 
   Template.resolution.events({
     'click .toggle-checked':function(){
-      Resolutions.update(this._id, {$set:{checked: !this.checked}});
+      Meteor.call("updateResolution", this._id, !this.checked);
     },
     'click .delete': function(){
-      Resolutions.remove(this._id);
+      Meteor.call("deleteResolution",this._id);
     }
-  })
+  });
+
+    Accounts.ui.config({
+        passwordSignupFields: "USERNAME_ONLY"
+    });
 }
 
 if (Meteor.isServer) {
-  Meteor.startup(function () {
-    // code to run on server at startup
-  });
+    // Only publish tasks
+    Meteor.publish("resolutions", function () {
+        return Resolutions.find({});
+    });
 }
+
+Meteor.methods({
+  addResolution: function(title){
+
+      // Make sure the user is logged in before inserting a task
+      if (! Meteor.userId()) {
+          throw new Meteor.Error("not-authorized");
+      }
+
+
+      Resolutions.insert({
+          title:title,
+          createdAt: new Date()
+      });
+  },
+
+  updateResolution: function(id, checked){
+    Resolutions.update(id, {$set:{checked: checked}});
+  },
+  deleteResolution:function(id){
+    Resolutions.remove(id);
+  }
+});
+
