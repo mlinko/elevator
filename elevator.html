@@ -1,12 +1,13 @@
 <head>
-  <title>Task Manager</title>
+    <meta charset="UTF-8">
+    <title>Task Manager</title>
 </head>
 
 <body>
   <div class="container">
     <header class="rows">
         <div class="columns large-8 small-text-center large-text-left">
-            <h1>Preostali poslovi ({{incompleteCount}})</h1>
+            <h1>Preostali zadaci ({{incompleteCount}})</h1>
         </div>
 
         <div class="columns large-4 small-text-center large-text-right">
@@ -17,8 +18,8 @@
     <div class="row">
         <div class="column 8-large">
             {{#if currentUser }}
-                {{#if isInRole 'admin' 'foreman'}}
-                <form class="new-resolution">
+                {{#if isInRole 'admin'}}
+                <form class="new-task">
                     <textarea name="title" placeholder="Unesite Adresu,Broj Telefona i Problem" rows="10"></textarea>
                     <input type="submit" value="Submit" class="button right">
                 </form>
@@ -30,20 +31,20 @@
     <div class="row">
       <div class="column 4-large">
           <label class="hide-finished column 4-large right">
-              Sakrij zavrsene poslove
+              Sakrij završene zadatke
               <input type="checkbox" checked="{{hideFinished}}">
           </label>
       </div>
   </div>
   <ul>
-      {{#each resolutions}}
-        {{>resolution}}
+      {{#each tasks}}
+        {{>task}}
       {{/each}}
     </ul>
   </div>
 </body>
 
-<template name="resolution">
+<template name="task">
     <li class="{{#if checked}}checked{{/if}} row">
         <div class="columns large-1">
             <input type="checkbox" checked="{{checked}}" class="toggle-checked">
