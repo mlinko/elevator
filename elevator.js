@@ -1,30 +1,29 @@
-Resolutions = new Mongo.Collection('resolutions');
+Tasks = new Mongo.Collection('tasks');
 
 if (Meteor.isClient) {
 
-    Meteor.subscribe("resolutions");
-
+    Meteor.subscribe("tasks");
     Template.body.helpers({
-    resolutions: function(){
+    tasks: function(){
       if(Session.get('hideFinished')){
-        return Resolutions.find({checked:{$ne:true}},{sort:{checked:1}});
+        return Tasks.find({checked:{$ne:true}},{sort:{checked:1}});
       }else {
-        return Resolutions.find({}, {sort:{checked:1}});
+        return Tasks.find({}, {sort:{checked:1}});
       }
     },
     hideFinished:function(){
       return Session.get('hideFinished');
     },
       incompleteCount: function () {
-        return Resolutions.find({checked: {$ne: true}}).count();
+        return Tasks.find({checked: {$ne: true}}).count();
     }
   });
 
   Template.body.events({
-    'submit .new-resolution': function(event) {
+    'submit .new-task': function(event) {
       var title = event.target.title.value;
 
-      Meteor.call("addResolution", title);
+      Meteor.call("addTask", title);
 
       event.target.title.value = "";
 
@@ -33,58 +32,59 @@ if (Meteor.isClient) {
     'change .hide-finished':function(event) {
       Session.set('hideFinished', event.target.checked);
     }
+
   });
 
-  Template.resolution.events({
+  Template.task.events({
     'click .toggle-checked':function(){
-      Meteor.call("updateResolution", this._id, !this.checked);
+      Meteor.call("updateTask", this._id, !this.checked);
     },
     'click .delete': function(){
-      Meteor.call("deleteResolution",this._id);
+      Meteor.call("deleteTask",this._id);
     }
   });
 
     Accounts.ui.config({
-        passwordSignupFields: "USERNAME_AND_EMAIL"
+        passwordSignupFields: "EMAIL"
     });
+
+
 }
 
 if (Meteor.isServer) {
     // Only publish tasks
-    Meteor.publish("resolutions", function () {
-        return Resolutions.find({});
+    Meteor.publish("tasks", function () {
+        return Tasks.find({});
     });
 
-        Meteor.publish(null, function (){
-            return Meteor.roles.find({});
-        });
-        var users = [
-            {name:"Osoba4",email:"Osoba4@qwe.qwe",roles:[]},
-            {name:"Osoba5",email:"Osoba5@qwe.qwe",roles:['admin']},
-            {name:"Osoba6",email:"Osoba6@qwe.qwe",roles:['foreman']}
-        ];
 
-        _.each(users, function (user) {
-            var id;
+      Meteor.publish(null, function (){
+          return Meteor.roles.find({})
+      });
 
-            id = Accounts.createUser({
-                email: user.email,
-                password: "apple1",
-                profile: { name: user.name }
-            });
+          var users = [
+              {name:"Osoba4",email:"Osoba4@qwe.qwe",roles:[]},
+              {name:"Osoba5",email:"Osoba5@qwe.qwe",roles:['admin']}
+          ];
 
-            if (user.roles.length > 0) {
-                // Need _id of existing user record so this call must come
-                // after `Accounts.createUser` or `Accounts.onCreate`
-                Roles.addUsersToRoles(id, user.roles);
-            }
+          _.each(users, function (user) {
+              var id;
 
-        });
+              id = Accounts.createUser({
+                  email: user.email,
+                  password: "apple1"
+              });
 
+              if (user.roles.length > 0) {
+                  // Need _id of existing user record so this call must come
+                  // after `Accounts.createUser` or `Accounts.onCreate`
+                  Roles.addUsersToRoles(id, user.roles);
+              }
+          });
 }
 
 Meteor.methods({
-  addResolution: function(title){
+  addTask: function(title){
 
       // Make sure the user is logged in before inserting a task
       if (! Meteor.userId()) {
@@ -92,17 +92,17 @@ Meteor.methods({
       }
 
 
-      Resolutions.insert({
+      Tasks.insert({
           title:title,
           createdAt: new Date()
       });
   },
 
-  updateResolution: function(id, checked){
-    Resolutions.update(id, {$set:{checked: checked}});
+  updateTask: function(id, checked){
+    Tasks.update(id, {$set:{checked: checked}});
   },
-  deleteResolution:function(id){
-    Resolutions.remove(id);
+  deleteTask:function(id){
+    Tasks.remove(id);
   }
 });
 
