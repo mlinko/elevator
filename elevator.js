@@ -57,7 +57,7 @@ if (Meteor.isServer) {
         return Tasks.find({});
     });
 
-
+    if(!Meteor.users.findOne()){
       Meteor.publish(null, function (){
           return Meteor.roles.find({})
       });
@@ -70,7 +70,7 @@ if (Meteor.isServer) {
           _.each(users, function (user) {
               var id;
 
-              id = Accounts.createUser({
+                  id = Accounts.createUser({
                   email: user.email,
                   password: "apple1"
               });
@@ -81,6 +81,7 @@ if (Meteor.isServer) {
                   Roles.addUsersToRoles(id, user.roles);
               }
           });
+};
 }
 
 Meteor.methods({
@@ -105,4 +106,3 @@ Meteor.methods({
     Tasks.remove(id);
   }
 });
-
